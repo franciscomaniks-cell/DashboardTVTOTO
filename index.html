@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TVTOTO | PROFESSIONAL MANAGEMENT SYSTEM</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      :root {
+        --primary: #2e3192;
+        --accent: #ffff00;
+        --sidebar: #0a0a1a;
+        --bg: #020617;
+        --panel: #0f0f23;
+        --border: rgba(255, 255, 255, 0.1);
+        --danger: #ff4d4d;
+        --success: #27ae60;
+        --sidebar-width: 260px;
+      }
+      * {
+        box-sizing: border-box;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      body {
+        margin: 0;
+        background-color: var(--bg);
+        color: #fff;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+
+      /* --- AUTH UI --- */
+      #auth-container {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .auth-card {
+        background: var(--panel);
+        padding: 40px;
+        border-radius: 20px;
+        width: 380px;
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      }
+      .auth-card h2 {
+        font-family: "Orbitron";
+        color: var(--accent);
+        text-align: center;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+      }
+      .auth-card input {
+        width: 100%;
+        padding: 14px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: #1a1a3a;
+        color: white;
+        outline: none;
+      }
+      .auth-card button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 800;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+      .btn-login {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-reg {
+        background: var(--success);
+        color: white;
+      }
+
+      /* --- SIDEBAR --- */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: var(--sidebar);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        flex-shrink: 0;
+        transition: 0.4s;
+        position: relative;
+        z-index: 100;
+      }
+      .sidebar.collapsed {
+        width: 0;
+        padding: 20px 0;
+        overflow: hidden;
+        border-right: none;
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
+        margin-bottom: 40px;
+      }
+      .brand {
+        font-family: "Orbitron";
+        color: var(--accent);
+        font-size: 1.4rem;
+        margin: 0;
+      }
+      .btn-toggle-side {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        font-weight: 800;
+      }
+      .btn-floating-open {
+        position: fixed;
+        left: 15px;
+        top: 20px;
+        z-index: 101;
+        display: none;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .nav-item {
+        padding: 15px 25px;
+        cursor: pointer;
+        color: #8492a6;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: 0.2s;
+        white-space: nowrap;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        background: var(--primary);
+        color: white;
+        border-left: 4px solid var(--accent);
+      }
+      .sidebar-bottom {
+        margin-top: auto;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btn-action {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.75rem;
+      }
+
+      /* --- MAIN AREA --- */
+      .main-container {
+        flex-grow: 1;
+        display: none;
+        overflow: hidden;
+      }
+      .content {
+        flex-grow: 1;
+        padding: 25px;
+        overflow-y: auto;
+        background: rgba(255, 255, 255, 0.01);
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* --- VOICE PANEL --- */
+      .voice-panel {
+        width: 300px;
+        background: var(--sidebar);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        flex-shrink: 0;
+      }
+      #chatDisplay {
+        flex-grow: 1;
+        overflow-y: auto;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+        color: #ccc;
+      }
+      .chat-msg {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        border-left: 3px solid var(--primary);
+      }
+
+      /* --- TABLE & CARDS --- */
+      .card {
+        background: var(--panel);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .table-wrap {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #000;
+      }
+      th {
+        background: var(--primary);
+        color: #fff;
+        padding: 12px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+      td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+
+      .clock {
+        background: #000;
+        color: #00ff88;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-family: "Orbitron";
+        min-width: 120px;
+        text-align: center;
+        border: 1px solid #00ff88;
+      }
+      .tool-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: var(--panel);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: #fff;
+        color: #000;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .btn-ui {
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        font-weight: 800;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      id="floatOpen"
+      class="btn-floating-open"
+      onclick="toggleSidebar(true)"
+    >
+      ☰ BUKA MENU
+    </button>
+
+    <div id="auth-container">
+      <div id="login-form" class="auth-card">
+        <h2>TVTOTO LOGIN</h2>
+        <input type="text" id="log-user" placeholder="Username" />
+        <input type="password" id="log-pass" placeholder="Password" />
+        <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+          "
+        >
+          <button
+            style="
+              background: transparent;
+              color: #8492a6;
+              border: none;
+              text-decoration: underline;
+              cursor: pointer;
+              font-size: 0.8rem;
+            "
+            onclick="switchAuth('register')"
+          >
+            Belum punya akun? Daftar
+          </button>
+          <button
+            style="
+              background: transparent;
+              color: var(--danger);
+              border: none;
+              text-decoration: underline;
+              cursor: pointer;
+              font-size: 0.8rem;
+            "
+            onclick="switchAuth('forgot')"
+          >
+            Lupa Password?
+          </button>
+        </div>
+      </div>
+
+      <div id="register-form" class="auth-card" style="display: none">
+        <h2>DAFTAR AKUN</h2>
+        <input type="text" id="reg-user" placeholder="Buat Username" />
+        <input type="password" id="reg-pass" placeholder="Buat Password" />
+        <button class="btn-reg" onclick="handleRegister()">
+          DAFTAR SEKARANG
+        </button>
+        <button
+          style="
+            background: transparent;
+            color: #8492a6;
+            border: none;
+            text-decoration: underline;
+            cursor: pointer;
+            width: 100%;
+          "
+          onclick="switchAuth('login')"
+        >
+          Sudah punya akun? Login
+        </button>
+      </div>
+
+      <div id="forgot-form" class="auth-card" style="display: none">
+        <h2>RESET PASSWORD</h2>
+        <p
+          style="
+            font-size: 0.75rem;
+            color: #8492a6;
+            text-align: center;
+            margin-bottom: 20px;
+          "
+        >
+          Masukkan username Anda untuk mengatur ulang password.
+        </p>
+        <input type="text" id="forgot-user" placeholder="Username Anda" />
+        <input
+          type="password"
+          id="forgot-new-pass"
+          placeholder="Password Baru"
+        />
+        <button
+          class="btn-login"
+          style="background: var(--danger)"
+          onclick="handleResetPassword()"
+        >
+          UPDATE PASSWORD
+        </button>
+        <button
+          style="
+            background: transparent;
+            color: #8492a6;
+            border: none;
+            text-decoration: underline;
+            cursor: pointer;
+            width: 100%;
+          "
+          onclick="switchAuth('login')"
+        >
+          Kembali ke Login
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar" id="mainSidebar" style="display: none">
+      <div class="sidebar-header">
+        <h1 class="brand">TVTOTO</h1>
+        <button class="btn-toggle-side" onclick="toggleSidebar(false)">
+          ☰ TUTUP
+        </button>
+      </div>
+      <div class="nav-item active" onclick="showPage('dash', this)">
+        DASHBOARD
+      </div>
+      <div class="nav-item" onclick="showPage('absen', this)">
+        ABSENSI KEHADIRAN
+      </div>
+      <div class="nav-item" onclick="showPage('job', this)">ATUR JOBDESK</div>
+      <div class="nav-item" onclick="showPage('staff', this)">DATA STAFF</div>
+      <div class="sidebar-bottom">
+        <button
+          class="btn-action"
+          style="background: #222; color: var(--danger)"
+          onclick="resetSystem()"
+        >
+          Reset Sistem
+        </button>
+        <button
+          class="btn-action"
+          style="background: var(--danger); color: white"
+          onclick="handleLogout()"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <div class="main-container" id="app-main">
+      <div class="content">
+        <div id="page-dash" class="page active">
+          <h2>⚝ DASHBOARD ABANG-ABANGAN ⚝</h2>
+          <div class="card">
+            <p style="color: #00ff88; font-weight: 800">
+              ⚡ QUICK IMPORT STAFF DATA
+            </p>
+            <textarea
+              id="rawInput"
+              rows="5"
+              placeholder="Tempel data shift di sini..."
+            ></textarea>
+            <button
+              class="btn-ui btn-login"
+              style="width: 100%"
+              onclick="processRaw()"
+            >
+              PROSES & SIMPAN DATA
+            </button>
+          </div>
+        </div>
+
+        <div id="page-absen" class="page">
+          <div class="tool-bar">
+            <div class="clock" id="clock">00:00:00</div>
+            <select id="selShift" style="padding: 10px; border-radius: 5px">
+              <option value="PAGI">PAGI (07:45)</option>
+              <option value="GANTUNG 10">GANTUNG 10 (09:45)</option>
+              <option value="GANTUNG 12">GANTUNG 12 (11:45)</option>
+              <option value="SORE">SORE (15:45)</option>
+              <option value="MALAM">MALAM (21:45)</option>
+            </select>
+            <input
+              type="text"
+              id="inNama"
+              placeholder="Nama Staff..."
+              list="staffList"
+              style="
+                flex-grow: 1;
+                padding: 10px;
+                border-radius: 5px;
+                border: none;
+              "
+            />
+            <datalist id="staffList"></datalist>
+            <button class="btn-ui btn-login" onclick="doAbsen()">ABSEN</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SHIFT</th>
+                  <th>NAMA STAFF</th>
+                  <th>TARGET</th>
+                  <th>AKTUAL</th>
+                  <th>STATUS</th>
+                  <th>AKSI</th>
+                </tr>
+              </thead>
+              <tbody id="tAbsen"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="page-job" class="page">
+          <div class="tool-bar">
+            <select id="jShift" style="padding: 8px; border-radius: 5px">
+              <option value="PAGI">SHIFT PAGI</option>
+              <option value="SORE">SHIFT SORE</option>
+              <option value="MALAM">SHIFT MALAM</option>
+            </select>
+            <button class="btn-ui btn-login" onclick="generateJob()">
+              🎲 ACAK JOBDESK
+            </button>
+            <button
+              class="btn-ui btn-reg"
+              style="background: #00ff88; color: #000"
+              onclick="saveJob()"
+            >
+              📸 SIMPAN PNG
+            </button>
+          </div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+              margin-bottom: 15px;
+            "
+          >
+            <textarea
+              id="jStaff"
+              rows="8"
+              placeholder="List Nama (Satu per baris)"
+              oninput="autoSaveJobInputs()"
+            ></textarea>
+            <textarea
+              id="jTugas"
+              rows="8"
+              placeholder="List Tugas (Satu per baris)"
+              oninput="autoSaveJobInputs()"
+            ></textarea>
+          </div>
+          <div
+            id="capture"
+            style="
+              background: #fff;
+              color: #000;
+              padding: 30px;
+              border-radius: 10px;
+            "
+          >
+            <h2
+              id="jTitle"
+              style="
+                text-align: center;
+                border-bottom: 3px solid #2e3192;
+                padding-bottom: 10px;
+                color: #000;
+              "
+            >
+              LAPORAN PEMBAGIAN TUGAS
+            </h2>
+            <table>
+              <thead>
+                <tr style="background: #eee; color: #000">
+                  <th>NAMA PERSONEL</th>
+                  <th>TUGAS OPERASIONAL</th>
+                </tr>
+              </thead>
+              <tbody id="tJob"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="page-staff" class="page">
+          <h2>MASTER DATA STAFF</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>NAMA</th>
+                  <th>MASUK</th>
+                  <th>PULANG</th>
+                  <th>AKSI</th>
+                </tr>
+              </thead>
+              <tbody id="tStaffMaster"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-panel">
+        <div
+          style="
+            font-family: 'Orbitron';
+            color: var(--accent);
+            font-size: 0.7rem;
+            margin-bottom: 15px;
+          "
+        >
+          VOICE ACTIVITY LOG
+        </div>
+        <div id="chatDisplay"></div>
+        <input
+          type="text"
+          id="chatIn"
+          placeholder="Type to speak..."
+          style="
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+          "
+        />
+      </div>
+    </div>
+
+    <script>
+      // --- DATABASE INITIALIZATION ---
+      if (!localStorage.getItem("tv_accounts")) {
+        localStorage.setItem(
+          "tv_accounts",
+          JSON.stringify([{ u: "admin", p: "admin" }])
+        );
+      }
+
+      let ACCOUNTS = JSON.parse(localStorage.getItem("tv_accounts"));
+      let STAFF_DB = JSON.parse(localStorage.getItem("tv_staff_v62")) || [];
+      let ABSEN_LOG = JSON.parse(localStorage.getItem("tv_absen_v62")) || [];
+
+      let JOBDESK_HTML = localStorage.getItem("tv_jobdesk_html") || "";
+      let JOBDESK_TITLE =
+        localStorage.getItem("tv_jobdesk_title") || "LAPORAN PEMBAGIAN TUGAS";
+
+      const SHIFT_TIMES = {
+        PAGI: "07:45:00",
+        "GANTUNG 10": "09:45:00",
+        "GANTUNG 12": "11:45:00",
+        SORE: "15:45:00",
+        MALAM: "21:45:00",
+      };
+
+      // --- AUTH FUNCTIONS ---
+      function switchAuth(type) {
+        document.getElementById("login-form").style.display = "none";
+        document.getElementById("register-form").style.display = "none";
+        document.getElementById("forgot-form").style.display = "none";
+
+        if (type === "login")
+          document.getElementById("login-form").style.display = "block";
+        if (type === "register")
+          document.getElementById("register-form").style.display = "block";
+        if (type === "forgot")
+          document.getElementById("forgot-form").style.display = "block";
+      }
+
+      function handleLogin() {
+        const u = document.getElementById("log-user").value.trim();
+        const p = document.getElementById("log-pass").value.trim();
+        const userFound = ACCOUNTS.find((a) => a.u === u && a.p === p);
+        if (userFound) {
+          localStorage.setItem("tv_isLoggedIn", "true");
+          location.reload();
+        } else {
+          alert("Username atau Password salah!");
+        }
+      }
+
+      function handleRegister() {
+        const u = document.getElementById("reg-user").value.trim();
+        const p = document.getElementById("reg-pass").value.trim();
+        if (!u || !p) return alert("Isi semua data!");
+        if (ACCOUNTS.find((a) => a.u === u))
+          return alert("Username sudah ada!");
+        ACCOUNTS.push({ u, p });
+        localStorage.setItem("tv_accounts", JSON.stringify(ACCOUNTS));
+        alert("Pendaftaran Berhasil!");
+        switchAuth("login");
+      }
+
+      function handleResetPassword() {
+        const u = document.getElementById("forgot-user").value.trim();
+        const newP = document.getElementById("forgot-new-pass").value.trim();
+
+        if (!u || !newP) return alert("Isi Username dan Password Baru!");
+
+        const accountIndex = ACCOUNTS.findIndex((a) => a.u === u);
+
+        if (accountIndex !== -1) {
+          ACCOUNTS[accountIndex].p = newP;
+          localStorage.setItem("tv_accounts", JSON.stringify(ACCOUNTS));
+          alert("Password berhasil diperbarui! Silakan login.");
+          switchAuth("login");
+        } else {
+          alert("Username tidak ditemukan!");
+        }
+      }
+
+      function handleLogout() {
+        localStorage.removeItem("tv_isLoggedIn");
+        location.reload();
+      }
+
+      // --- CORE FUNCTIONS ---
+      function speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text.toLowerCase());
+        msg.lang = "id-ID";
+        window.speechSynthesis.speak(msg);
+      }
+
+      function doAbsen() {
+        const inputRaw = document.getElementById("inNama").value;
+        const namaInput = inputRaw.trim().toUpperCase();
+        const shift = document.getElementById("selShift").value;
+        const time = document.getElementById("clock").innerText;
+        const target = SHIFT_TIMES[shift];
+
+        if (!STAFF_DB.find((s) => s.nama === namaInput))
+          return alert("Staff tidak terdaftar!");
+
+        const lateInfo = calculateDetailedDiff(target, time);
+        const status = lateInfo ? "TELAT" : "TEPAT";
+
+        ABSEN_LOG.push({
+          shift,
+          nama: namaInput,
+          target,
+          aktual: time,
+          status,
+          lateText: lateInfo ? lateInfo.text : "",
+        });
+        localStorage.setItem("tv_absen_v62", JSON.stringify(ABSEN_LOG));
+
+        const namaPanggilan = inputRaw.split(" ")[0];
+        if (lateInfo)
+          speak(`Perhatian ${namaPanggilan}. Anda terlambat ${lateInfo.text}.`);
+        else speak(`Selamat bekerja ${namaPanggilan}.`);
+
+        addLog(
+          `[${status}] ${namaInput} ${
+            lateInfo ? "(" + lateInfo.text + ")" : ""
+          }`
+        );
+        renderAbsen();
+        document.getElementById("inNama").value = "";
+      }
+
+      function calculateDetailedDiff(target, actual) {
+        const t = target.split(":").map(Number);
+        const a = actual.split(":").map(Number);
+        const tSec = t[0] * 3600 + t[1] * 60 + (t[2] || 0);
+        const aSec = a[0] * 3600 + a[1] * 60 + (a[2] || 0);
+        const diff = aSec - tSec;
+        if (diff <= 0) return null;
+        const h = Math.floor(diff / 3600),
+          m = Math.floor((diff % 3600) / 60),
+          s = diff % 60;
+        let txt = "";
+        if (h > 0) txt += h + " jam ";
+        if (m > 0) txt += m + " menit ";
+        if (s > 0) txt += s + " detik";
+        return { text: txt.trim(), totalSeconds: diff };
+      }
+
+      function autoSaveJobInputs() {
+        const s = document.getElementById("jStaff").value;
+        const t = document.getElementById("jTugas").value;
+        localStorage.setItem("tv_job_input_staff", s);
+        localStorage.setItem("tv_job_input_tugas", t);
+      }
+
+      function generateJob() {
+        const s = document
+          .getElementById("jStaff")
+          .value.split("\n")
+          .filter((x) => x.trim());
+        const t = document
+          .getElementById("jTugas")
+          .value.split("\n")
+          .filter((x) => x.trim());
+
+        if (!s.length || !t.length) return alert("Isi Nama & Tugas!");
+
+        const tugasTanpaOperator = t.filter(
+          (item) => item.toUpperCase() !== "OPERATOR"
+        );
+        let shuffledTugas = [...tugasTanpaOperator].sort(
+          () => Math.random() - 0.5
+        );
+
+        let html = `<tr><td>${s[0].toUpperCase()}</td><td>OPERATOR</td></tr>`;
+        s.slice(1).forEach((name, i) => {
+          html += `<tr><td>${name.toUpperCase()}</td><td>${
+            shuffledTugas[i] || "BANTU OPERASIONAL"
+          }</td></tr>`;
+        });
+
+        document.getElementById("tJob").innerHTML = html;
+        const titleText = `JOBDESK - SHIFT ${
+          document.getElementById("jShift").value
+        }`;
+        document.getElementById("jTitle").innerText = titleText;
+
+        localStorage.setItem("tv_jobdesk_html", html);
+        localStorage.setItem("tv_jobdesk_title", titleText);
+
+        addLog("Jobdesk diacak. PJ: " + s[0].toUpperCase());
+      }
+
+      function saveJob() {
+        html2canvas(document.getElementById("capture")).then((canvas) => {
+          const a = document.createElement("a");
+          a.href = canvas.toDataURL();
+          a.download = `Jobdesk_${document.getElementById("jShift").value}.png`;
+          a.click();
+        });
+      }
+
+      function toggleSidebar(open) {
+        const s = document.getElementById("mainSidebar"),
+          f = document.getElementById("floatOpen");
+        if (open) {
+          s.classList.remove("collapsed");
+          f.style.display = "none";
+        } else {
+          s.classList.add("collapsed");
+          setTimeout(() => (f.style.display = "block"), 300);
+        }
+      }
+
+      function showPage(id, el) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        document.getElementById("page-" + id).classList.add("active");
+        el.classList.add("active");
+      }
+
+      function processRaw() {
+        const lines = document.getElementById("rawInput").value.split("\n");
+        lines.forEach((l) => {
+          const times = l.match(/\d{2}:\d{2}:\d{2}/g);
+          if (times && times.length >= 2) {
+            let name = l
+              .replace(/^\d+/, "")
+              .replace(/\d{2}:\d{2}:\d{2}/g, "")
+              .replace(/\d+\sJAM/gi, "")
+              .trim();
+            if (name)
+              STAFF_DB.push({
+                nama: name.toUpperCase(),
+                masuk: times[0],
+                pulang: times[1],
+              });
+          }
+        });
+        localStorage.setItem("tv_staff_v62", JSON.stringify(STAFF_DB));
+        renderStaff();
+        alert("Data Staff Diimport!");
+      }
+
+      function renderAbsen() {
+        document.getElementById("tAbsen").innerHTML = ABSEN_LOG.map(
+          (x, i) => `
+          <tr><td>${x.shift}</td><td style="text-align:left">${
+            x.nama
+          }</td><td>${x.target}</td><td>${x.aktual}</td>
+          <td style="color:${x.status === "TELAT" ? "red" : "green"}">${
+            x.status
+          }<br><small style="font-size:10px">${x.lateText || ""}</small></td>
+          <td><button onclick="delAbsen(${i})" style="border:none; background:none; cursor:pointer;">✕</button></td></tr>`
+        )
+          .reverse()
+          .join("");
+      }
+
+      function renderStaff() {
+        document.getElementById("staffList").innerHTML = STAFF_DB.map(
+          (s) => `<option value="${s.nama}">`
+        ).join("");
+        document.getElementById("tStaffMaster").innerHTML = STAFF_DB.map(
+          (s, i) =>
+            `<tr><td>${i + 1}</td><td>${s.nama}</td><td>${s.masuk}</td><td>${
+              s.pulang
+            }</td><td><button onclick="delStaff(${i})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:4px;">Hapus</button></td></tr>`
+        ).join("");
+      }
+
+      function addLog(t) {
+        const d = document.getElementById("chatDisplay");
+        d.innerHTML += `<div class="chat-msg"><b>${new Date().toLocaleTimeString()}</b><br>${t}</div>`;
+        d.scrollTop = d.scrollHeight;
+      }
+
+      function delAbsen(i) {
+        const realIndex = ABSEN_LOG.length - 1 - i;
+        ABSEN_LOG.splice(realIndex, 1);
+        localStorage.setItem("tv_absen_v62", JSON.stringify(ABSEN_LOG));
+        renderAbsen();
+      }
+
+      function delStaff(i) {
+        STAFF_DB.splice(i, 1);
+        localStorage.setItem("tv_staff_v62", JSON.stringify(STAFF_DB));
+        renderStaff();
+      }
+
+      function resetSystem() {
+        if (
+          confirm(
+            "Reset data Absensi dan Jobdesk? (Data Staff & Akun tetap aman)"
+          )
+        ) {
+          ABSEN_LOG = [];
+          localStorage.setItem("tv_absen_v62", JSON.stringify(ABSEN_LOG));
+          localStorage.removeItem("tv_jobdesk_html");
+          localStorage.removeItem("tv_jobdesk_title");
+          localStorage.removeItem("tv_job_input_staff");
+          localStorage.removeItem("tv_job_input_tugas");
+
+          document.getElementById("tJob").innerHTML = "";
+          document.getElementById("jStaff").value = "";
+          document.getElementById("jTugas").value = "";
+          document.getElementById("jTitle").innerText =
+            "LAPORAN PEMBAGIAN JOBDESK";
+
+          renderAbsen();
+          addLog("Sistem di-reset: Absensi & Jobdesk dibersihkan.");
+          alert("Data Absensi dan Jobdesk telah dibersihkan.");
+        }
+      }
+
+      function init() {
+        setInterval(() => {
+          const clockEl = document.getElementById("clock");
+          if (clockEl)
+            clockEl.innerText = new Date().toLocaleTimeString("en-GB");
+        }, 1000);
+
+        renderStaff();
+        renderAbsen();
+
+        document.getElementById("tJob").innerHTML = JOBDESK_HTML;
+        document.getElementById("jTitle").innerText = JOBDESK_TITLE;
+        document.getElementById("jStaff").value =
+          localStorage.getItem("tv_job_input_staff") || "";
+        document.getElementById("jTugas").value =
+          localStorage.getItem("tv_job_input_tugas") || "";
+
+        document.getElementById("chatIn").addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            speak(e.target.value);
+            addLog(e.target.value);
+            e.target.value = "";
+          }
+        });
+      }
+
+      window.onload = () => {
+        if (localStorage.getItem("tv_isLoggedIn") === "true") {
+          document.getElementById("auth-container").style.display = "none";
+          document.getElementById("mainSidebar").style.display = "flex";
+          document.getElementById("app-main").style.display = "flex";
+          init();
+        }
+      };
+    </script>
+  </body>
+</html>
