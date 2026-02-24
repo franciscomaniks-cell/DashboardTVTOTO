@@ -13,9 +13,10 @@
       :root {
         --primary: #2e3192;
         --accent: #ffff00;
-        --sidebar: #0a0a1a;
+        /* Diubah menjadi RGBA agar background terlihat tembus pandang */
+        --sidebar: rgba(10, 10, 26, 0.9); 
         --bg: #020617;
-        --panel: #0f0f23;
+        --panel: rgba(15, 15, 35, 0.85);
         --border: rgba(255, 255, 255, 0.1);
         --danger: #ff4d4d;
         --success: #27ae60;
@@ -27,7 +28,10 @@
       }
       body {
         margin: 0;
-        background-color: var(--bg);
+        /* Menambahkan Background Lokal dengan Overlay Gelap */
+        background: linear-gradient(rgba(2, 6, 23, 0.7), rgba(2, 6, 23, 0.7)), 
+                    url('background.png') no-repeat center center fixed;
+        background-size: cover;
         color: #fff;
         height: 100vh;
         overflow: hidden;
@@ -39,7 +43,8 @@
         position: fixed;
         inset: 0;
         z-index: 9999;
-        background: var(--bg);
+        /* Background Auth mengikuti gambar body */
+        background: inherit;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -51,6 +56,7 @@
         width: 380px;
         border: 1px solid var(--border);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
       }
       .auth-card h2 {
         font-family: "Orbitron";
@@ -99,6 +105,7 @@
         transition: 0.4s;
         position: relative;
         z-index: 100;
+        backdrop-filter: blur(10px);
       }
       .sidebar.collapsed {
         width: 0;
@@ -186,7 +193,8 @@
         flex-grow: 1;
         padding: 25px;
         overflow-y: auto;
-        background: rgba(255, 255, 255, 0.01);
+        /* Membuat background konten transparan agar body terlihat */
+        background: transparent;
       }
       .page {
         display: none;
@@ -204,6 +212,7 @@
         flex-direction: column;
         padding: 20px;
         flex-shrink: 0;
+        backdrop-filter: blur(10px);
       }
       #chatDisplay {
         flex-grow: 1;
@@ -230,6 +239,7 @@
         border-radius: 12px;
         border: 1px solid var(--border);
         margin-bottom: 20px;
+        backdrop-filter: blur(5px);
       }
       .table-wrap {
         background: #fff;
@@ -275,6 +285,7 @@
         padding: 15px;
         border-radius: 10px;
         margin-bottom: 15px;
+        backdrop-filter: blur(5px);
       }
       textarea {
         width: 100%;
