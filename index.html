@@ -9,11 +9,14 @@
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
     <style>
       :root {
         --primary: #2e3192;
         --accent: #ffff00;
-        /* Sidebar & Panel dibuat semi-transparan agar background terlihat */
         --sidebar: rgba(10, 10, 26, 0.8); 
         --bg: #020617;
         --panel: rgba(15, 15, 35, 0.8);
@@ -22,13 +25,9 @@
         --success: #27ae60;
         --sidebar-width: 260px;
       }
-      * {
-        box-sizing: border-box;
-        font-family: "Plus Jakarta Sans", sans-serif;
-      }
+      * { box-sizing: border-box; font-family: "Plus Jakarta Sans", sans-serif; }
       body {
         margin: 0;
-        /* Implementasi Background Gambar dengan Overlay Gelap agar teks tetap terbaca */
         background: linear-gradient(rgba(2, 6, 23, 0.6), rgba(2, 6, 23, 0.6)), 
                     url('background.png.webp') no-repeat center center fixed;
         background-size: cover;
@@ -44,7 +43,6 @@
         position: fixed;
         inset: 0;
         z-index: 9999;
-        /* Background Auth mengambil dari body */
         background: inherit;
         display: flex;
         align-items: center;
@@ -102,199 +100,38 @@
         z-index: 100;
         backdrop-filter: blur(10px);
       }
-      .sidebar.collapsed {
-        width: 0;
-        padding: 20px 0;
-        overflow: hidden;
-        border-right: none;
-      }
-      .sidebar-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 15px;
-        margin-bottom: 40px;
-      }
-      .brand {
-        font-family: "Orbitron";
-        color: var(--accent);
-        font-size: 1.4rem;
-        margin: 0;
-      }
-      .btn-toggle-side {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 6px 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.7rem;
-        font-weight: 800;
-      }
-      .btn-floating-open {
-        position: fixed;
-        left: 15px;
-        top: 20px;
-        z-index: 101;
-        display: none;
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 800;
-      }
+      .sidebar.collapsed { width: 0; padding: 20px 0; overflow: hidden; border-right: none; }
+      .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 0 15px; margin-bottom: 40px; }
+      .brand { font-family: "Orbitron"; color: var(--accent); font-size: 1.4rem; margin: 0; }
+      .btn-toggle-side { background: var(--primary); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: 800; }
+      .btn-floating-open { position: fixed; left: 15px; top: 20px; z-index: 101; display: none; background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 800; }
 
-      .nav-item {
-        padding: 15px 25px;
-        cursor: pointer;
-        color: #8492a6;
-        font-weight: 600;
-        font-size: 0.85rem;
-        transition: 0.2s;
-        white-space: nowrap;
-      }
-      .nav-item:hover, .nav-item.active {
-        background: var(--primary);
-        color: white;
-        border-left: 4px solid var(--accent);
-      }
-      .sidebar-bottom {
-        margin-top: auto;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .btn-action {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 0.75rem;
-      }
+      .nav-item { padding: 15px 25px; cursor: pointer; color: #8492a6; font-weight: 600; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
+      .nav-item:hover, .nav-item.active { background: var(--primary); color: white; border-left: 4px solid var(--accent); }
+      .sidebar-bottom { margin-top: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+      .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
 
       /* --- MAIN AREA --- */
-      .main-container {
-        flex-grow: 1;
-        display: none;
-        overflow: hidden;
-      }
-      .content {
-        flex-grow: 1;
-        padding: 25px;
-        overflow-y: auto;
-        background: transparent;
-      }
+      .main-container { flex-grow: 1; display: none; overflow: hidden; }
+      .content { flex-grow: 1; padding: 25px; overflow-y: auto; background: transparent; }
       .page { display: none; }
       .page.active { display: block; }
 
       /* --- VOICE PANEL --- */
-      .voice-panel {
-        width: 300px;
-        background: var(--sidebar);
-        border-left: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        flex-shrink: 0;
-        backdrop-filter: blur(10px);
-      }
-      #chatDisplay {
-        flex-grow: 1;
-        overflow-y: auto;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 8px;
-        padding: 10px;
-        font-size: 0.8rem;
-        margin-bottom: 10px;
-        color: #ccc;
-      }
-      .chat-msg {
-        background: rgba(255, 255, 255, 0.05);
-        padding: 8px;
-        border-radius: 5px;
-        margin-bottom: 8px;
-        border-left: 3px solid var(--primary);
-      }
+      .voice-panel { width: 300px; background: var(--sidebar); border-left: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; backdrop-filter: blur(10px); }
+      #chatDisplay { flex-grow: 1; overflow-y: auto; background: rgba(0, 0, 0, 0.4); border-radius: 8px; padding: 10px; font-size: 0.8rem; margin-bottom: 10px; color: #ccc; }
+      .chat-msg { background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 5px; margin-bottom: 8px; border-left: 3px solid var(--primary); }
 
       /* --- TABLE & CARDS --- */
-      .card {
-        background: var(--panel);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        margin-bottom: 20px;
-        backdrop-filter: blur(10px);
-      }
-      .table-wrap {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        color: #000;
-      }
-      th {
-        background: var(--primary);
-        color: #fff;
-        padding: 12px;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-      }
-      td {
-        padding: 12px;
-        border-bottom: 1px solid #eee;
-        text-align: center;
-        font-weight: 700;
-        font-size: 0.85rem;
-      }
-
-      .clock {
-        background: rgba(0, 0, 0, 0.8);
-        color: #00ff88;
-        padding: 10px 15px;
-        border-radius: 6px;
-        font-family: "Orbitron";
-        min-width: 120px;
-        text-align: center;
-        border: 1px solid #00ff88;
-      }
-      .tool-bar {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        background: var(--panel);
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        backdrop-filter: blur(10px);
-      }
-      textarea {
-        width: 100%;
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        background: rgba(255, 255, 255, 0.9);
-        color: #000;
-        font-weight: 600;
-        margin-bottom: 10px;
-      }
-      .btn-ui {
-        padding: 10px 20px;
-        border-radius: 6px;
-        border: none;
-        font-weight: 800;
-        cursor: pointer;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-      }
+      .card { background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; backdrop-filter: blur(10px); }
+      .table-wrap { background: rgba(255, 255, 255, 0.95); border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+      table { width: 100%; border-collapse: collapse; color: #000; }
+      th { background: var(--primary); color: #fff; padding: 12px; font-size: 0.75rem; text-transform: uppercase; }
+      td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-weight: 700; font-size: 0.85rem; }
+      .clock { background: rgba(0, 0, 0, 0.8); color: #00ff88; padding: 10px 15px; border-radius: 6px; font-family: "Orbitron"; min-width: 120px; text-align: center; border: 1px solid #00ff88; }
+      .tool-bar { display: flex; gap: 10px; align-items: center; background: var(--panel); padding: 15px; border-radius: 10px; margin-bottom: 15px; backdrop-filter: blur(10px); }
+      textarea { width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255, 255, 255, 0.9); color: #000; font-weight: 600; margin-bottom: 10px; }
+      .btn-ui { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; }
     </style>
   </head>
   <body>
@@ -442,12 +279,21 @@
     </div>
 
     <script>
-      // --- Seluruh Logic JavaScript Anda Tetap Dipertahankan ---
-      if (!localStorage.getItem("tv_accounts")) {
-        localStorage.setItem("tv_accounts", JSON.stringify([{ u: "admin", p: "admin" }]));
-      }
+      // 1. --- KONFIGURASI FIREBASE ---
+      const firebaseConfig = {
+        apiKey: "ISI_API_KEY_KAMU",
+        authDomain: "PROYEK_ANDA.firebaseapp.com",
+        databaseURL: "https://PROYEK_ANDA.firebaseio.com",
+        projectId: "PROYEK_ANDA",
+        storageBucket: "PROYEK_ANDA.appspot.com",
+        messagingSenderId: "ID_ANDA",
+        appId: "APP_ID_ANDA"
+      };
 
-      let ACCOUNTS = JSON.parse(localStorage.getItem("tv_accounts"));
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      // 2. --- STATE DATA ---
       let STAFF_DB = JSON.parse(localStorage.getItem("tv_staff_v62")) || [];
       let ABSEN_LOG = JSON.parse(localStorage.getItem("tv_absen_v62")) || [];
       let JOBDESK_HTML = localStorage.getItem("tv_jobdesk_html") || "";
@@ -455,6 +301,7 @@
 
       const SHIFT_TIMES = { PAGI: "07:45:00", "GANTUNG 10": "09:45:00", "GANTUNG 12": "11:45:00", SORE: "15:45:00", MALAM: "21:45:00" };
 
+      // 3. --- FUNGSI AUTH (CLOUDBASE) ---
       function switchAuth(type) {
         document.getElementById("login-form").style.display = "none";
         document.getElementById("register-form").style.display = "none";
@@ -465,37 +312,52 @@
       }
 
       function handleLogin() {
-        const u = document.getElementById("log-user").value.trim();
+        const u = document.getElementById("log-user").value.trim().toLowerCase();
         const p = document.getElementById("log-pass").value.trim();
-        const userFound = ACCOUNTS.find((a) => a.u === u && a.p === p);
-        if (userFound) {
-          localStorage.setItem("tv_isLoggedIn", "true");
-          location.reload();
-        } else { alert("Username atau Password salah!"); }
+        if(!u || !p) return alert("Isi semua data!");
+
+        db.ref('users/' + u).once('value', (snapshot) => {
+          const userData = snapshot.val();
+          if (userData && userData.p === p) {
+            localStorage.setItem("tv_isLoggedIn", "true");
+            localStorage.setItem("tv_currentUser", u);
+            location.reload();
+          } else {
+            alert("Username atau Password salah!");
+          }
+        });
       }
 
       function handleRegister() {
-        const u = document.getElementById("reg-user").value.trim();
+        const u = document.getElementById("reg-user").value.trim().toLowerCase();
         const p = document.getElementById("reg-pass").value.trim();
         if (!u || !p) return alert("Isi semua data!");
-        if (ACCOUNTS.find((a) => a.u === u)) return alert("Username sudah ada!");
-        ACCOUNTS.push({ u, p });
-        localStorage.setItem("tv_accounts", JSON.stringify(ACCOUNTS));
-        alert("Pendaftaran Berhasil!");
-        switchAuth("login");
+
+        db.ref('users/' + u).once('value', (snapshot) => {
+          if (snapshot.exists()) {
+            alert("Username sudah terdaftar!");
+          } else {
+            db.ref('users/' + u).set({ u, p }).then(() => {
+              alert("Pendaftaran Berhasil di Cloud!");
+              switchAuth("login");
+            });
+          }
+        });
       }
 
       function handleResetPassword() {
-        const u = document.getElementById("forgot-user").value.trim();
+        const u = document.getElementById("forgot-user").value.trim().toLowerCase();
         const newP = document.getElementById("forgot-new-pass").value.trim();
-        if (!u || !newP) return alert("Isi Username dan Password Baru!");
-        const accountIndex = ACCOUNTS.findIndex((a) => a.u === u);
-        if (accountIndex !== -1) {
-          ACCOUNTS[accountIndex].p = newP;
-          localStorage.setItem("tv_accounts", JSON.stringify(ACCOUNTS));
-          alert("Password berhasil diperbarui! Silakan login.");
-          switchAuth("login");
-        } else { alert("Username tidak ditemukan!"); }
+        if (!u || !newP) return alert("Isi data dengan lengkap!");
+
+        db.ref('users/' + u).once('value', (snapshot) => {
+          if (snapshot.exists()) {
+            db.ref('users/' + u).update({ p: newP }).then(() => {
+              alert("Password berhasil diperbarui di Cloud!");
+              switchAuth("login");
+            });
+          } else { alert("Username tidak ditemukan!"); }
+        });
       }
 
       function handleLogout() {
@@ -503,6 +365,7 @@
         location.reload();
       }
 
+      // 4. --- FITUR CORE (TIDAK BERUBAH) ---
       function speak(text) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text.toLowerCase());
@@ -620,8 +483,10 @@
 
       function addLog(t) {
         const d = document.getElementById("chatDisplay");
-        d.innerHTML += `<div class="chat-msg"><b>${new Date().toLocaleTimeString()}</b><br>${t}</div>`;
-        d.scrollTop = d.scrollHeight;
+        if(d) {
+           d.innerHTML += `<div class="chat-msg"><b>${new Date().toLocaleTimeString()}</b><br>${t}</div>`;
+           d.scrollTop = d.scrollHeight;
+        }
       }
 
       function delAbsen(i) {
