@@ -43,7 +43,7 @@
         position: fixed;
         inset: 0;
         z-index: 9999;
-        background: inherit;
+        background: #020617;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -287,11 +287,14 @@
         projectId: "dashboardtvtoto",
         storageBucket: "dashboardtvtoto.firebasestorage.app",
         messagingSenderId: "670077038158",
-        appId: "1:670077038158:web:a66ae87c5e6154cc611d1f"
+        appId: "1:670077038158:web:a66ae87c5e6154cc611d1f",
         measurementId: "G-G7TQM7EYG6"
       };
 
-      firebase.initializeApp(firebaseConfig);
+      // Inisialisasi Firebase
+      if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+      }
       const db = firebase.database();
 
       // 2. --- STATE DATA ---
@@ -302,7 +305,7 @@
 
       const SHIFT_TIMES = { PAGI: "07:45:00", "GANTUNG 10": "09:45:00", "GANTUNG 12": "11:45:00", SORE: "15:45:00", MALAM: "21:45:00" };
 
-      // 3. --- FUNGSI AUTH (CLOUDBASE) ---
+      // 3. --- FUNGSI AUTH ---
       function switchAuth(type) {
         document.getElementById("login-form").style.display = "none";
         document.getElementById("register-form").style.display = "none";
@@ -317,7 +320,7 @@
         const p = document.getElementById("log-pass").value.trim();
         if(!u || !p) return alert("Isi semua data!");
 
-        db.ref('users/' + u).once('value', (snapshot) => {
+        db.ref('users/' + u).once('value').then((snapshot) => {
           const userData = snapshot.val();
           if (userData && userData.p === p) {
             localStorage.setItem("tv_isLoggedIn", "true");
@@ -326,7 +329,7 @@
           } else {
             alert("Username atau Password salah!");
           }
-        });
+        }).catch(err => alert("Error koneksi database!"));
       }
 
       function handleRegister() {
@@ -354,7 +357,7 @@
         db.ref('users/' + u).once('value', (snapshot) => {
           if (snapshot.exists()) {
             db.ref('users/' + u).update({ p: newP }).then(() => {
-              alert("Password berhasil diperbarui di Cloud!");
+              alert("Password berhasil diperbarui!");
               switchAuth("login");
             });
           } else { alert("Username tidak ditemukan!"); }
@@ -366,7 +369,7 @@
         location.reload();
       }
 
-      // 4. --- FITUR CORE (TIDAK BERUBAH) ---
+      // 4. --- FITUR CORE ---
       function speak(text) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text.toLowerCase());
@@ -442,7 +445,7 @@
 
       function toggleSidebar(open) {
         const s = document.getElementById("mainSidebar"), f = document.getElementById("floatOpen");
-        if (open) { s.classList.remove("collapsed"); f.style.display = "none"; }
+        if (open) { s.style.display = "flex"; s.classList.remove("collapsed"); f.style.display = "none"; }
         else { s.classList.add("collapsed"); setTimeout(() => (f.style.display = "block"), 300); }
       }
 
